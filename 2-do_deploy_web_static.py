@@ -1,13 +1,40 @@
 #!/usr/bin/python3
 
-from fabric.api import task, run, put, env
-from os.path import exists
+from fabric.api import task, run, put, env, local
+from os.path import exists, join
+from datetime import datetime
 
 # Define the web server IP addresses
 env.hosts = ['204.236.241.48', '3.90.83.137']
 env.user = 'ubuntu'
 env.key_filename = '~/.ssh/id_rsa'
 
+@task
+def do_pack():
+    """
+    Compresses the contents of the web_static folder into a .tgz archive.
+    """
+
+    # Create the versions folder if it doesn't exist
+    local('mkdir -p versions')
+
+    # Generate the archive filename (web_static_<year><month><day><hour><minute><second>.tgz)
+    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    archive_name = f'web_static_{timestamp}.tgz'
+    archive_path = join('versions', archive_name)
+
+    # Print msg to stdout
+    print(f"Packing web_static to {archive_path}")
+
+    # Compress the contents of the web_static folder
+    result = local(f'tar -cvzf {archive_path} web_static')
+
+    if result.succeeded:
+        print(f'Archive created: {archive_path}')
+        return archive_path
+    else:
+        print('Archive creation failed.')
+        return None
 
 @task
 def do_deploy(archive_path):
