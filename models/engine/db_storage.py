@@ -6,13 +6,17 @@ module: models/engine/db_storage
 Database storage
 """
 
-from os import getenv
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker, scoped_session
 import models
-from models.base_model import Base
+from os import getenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session, relationship
+from models.base_model import BaseModel, Base
 from models.city import City
 from models.state import State
+from models.place import Place
+from models.review import Review
+from models.user import User
+from models.amenity import Amenity
 
 
 class DBStorage:
@@ -33,23 +37,18 @@ class DBStorage:
 
     def all(self, cls=None):
         """Query on the current database session"""
-        data_dic = {}
-
-        if cls == None:
-            objs = self.__session.query(models.classes[cls]).all()
-            for obj in objs:
-                k = f"{obj.__class__.__name__,}.{obj.id}"
-                data_dic[k] = obj
-            return data_dic
+        if cls is None:
+            objects = self.__session.query(User).all()
+            objects.extend(self.__session.query(State).all())
+            objects.extend(self.__session.query(City).all())
+            objects.extend(self.__session.query(Place).all())
+            objects.extend(self.__session.query(Review).all())
+            objects.extend(self.__session.query(Amenity).all())
         else:
-            for k, v in models.classes.items():
-                if k != "BaseModel":
-                    objs = self.__session.query(v).all()
-                    if len(objs) >= 1:
-                        for obj in objs:
-                            k = f"{obj.__class__.__name__}.{obj.id}"
-                            data_dic[k] = obj
-            return data_dic
+            if type(cls) == str:
+                cls = eval(cls)
+            objects = self.__session.query(cls)
+        return {"{}.{}".format(type(o).__name__, o.id): o for o in objs}
 
     def new(self, obj):
         """ Add obj to current db session"""
@@ -66,7 +65,7 @@ class DBStorage:
 
     def reload(self):
         """Reload session"""
-        self.__session = Base.metadata.create_all(self.__engine)
+        Base.metadata.create_all(self.__engine)
         fac = sessionmaker(bind=self.__engine, expire_on_commit=False)
         Session = scoped_session(fac)
         self.__session = Session()
