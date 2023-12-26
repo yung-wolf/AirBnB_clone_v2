@@ -54,40 +54,42 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
+        try:
+            if not args:
+                raise SyntaxError
 
-        args_list = args.split(" ")
-        cls_name = args_list[0]
+            args_list = args.split(" ")
+            cls_name = args_list[0]
 
-        if cls_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
 
-        # get parameters from CLI
-        params = args_list[1:]
-        att_dic = {}  # empty dictionary 4 attributes of key-value pairs
+            # get parameters from CLI
+            params = args_list[1:]
+            att_dic = {}  # empty dictionary 4 attributes of key-value pairs
 
-        for record in params:
-            key, value = tuple(record.split('='))  # split into key & value
-            if value[0] == '"':
-                value = value.strip('"').replace('_', ' ')
+            for record in params:
+                key, value = tuple(record.split('='))  # split into key & value
+                if value[0] == '"':
+                    value = value.strip('"').replace('_', ' ')
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                att_dic[key] = value  # add to dictionary
+
+            if att_dic == {}:
+                new_object = eval(cls_name)()
             else:
-                try:
-                    value = eval(value)
-                except (SyntaxError, NameError):
-                    continue
-            att_dic[key] = value  # add to dictionary
+                new_object = eval(cls_name)(**att_dic)
+                storage.new(new_object)
 
-        if att_dic == {}:
-            new_object = eval(cls_name)()
-        else:
-            new_object = eval(cls_name)(**kwargs)
-            storage.new(new_object)
+            print(new_object.id)
+            storage.save()
 
-        print(new_object.id)
-        storage.save()
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
+            print("** class doesn't exist **")
 
     def help_create(self):
         """ Help information for the create method """
