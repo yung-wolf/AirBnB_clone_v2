@@ -2,6 +2,8 @@
 """ Console Module """
 import cmd
 import sys
+from datetime import datetime
+from shlex import split
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -119,7 +121,7 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return
 
-        args_list = args.split()
+        args_list = args.split(" ")
         cls_name = args_list[0]
 
         if cls_name not in HBNBCommand.classes:
