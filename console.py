@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """ Console Module """
 import cmd
-import sys
 from datetime import datetime
 from shlex import split
 from models.base_model import BaseModel
@@ -18,7 +17,7 @@ class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
 
     # determines prompt for interactive/non-interactive modes
-    prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
+    prompt = '(hbnb) '
 
     classes = {
                'BaseModel': BaseModel, 'User': User, 'Place': Place,
@@ -131,27 +130,25 @@ class HBNBCommand(cmd.Cmd):
         # get parameters from CLI
         params = args_list[1:]
         att_dic = {}  # empty dictionary 4 attributes of key-value pairs
-        for record in params:
-            key_value = record.split('=')  # split into key & value
-            if len(key_value) == 2:
-                key, r_value = key_value
-            # strings records
-            if r_value.startswith('"') and r_value.endswith('"'):
-                value = r_value[1:-1].replace('_', ' ').replace('\\"', '"')
-            # integer records
-            elif r_value.isdigit():
-                value = int(r_value)
-            # float records
-            elif '.' in r_value and r_value.replace('.', '').isdigit():
-                value = float(r_value)
-            else:
-                continue  # skip parameter doesn’t fit with these requirements
 
+        for record in params:
+            key, value = tuple(record.split('='))  # split into key & value
+            if value[0] == '"':
+                value = value.strip('"').replace('_', ' ')
+            else:
+                try:
+                    value = eval(value)
+                except (SyntaxError, NameError):
+                    continue
             att_dic[key] = value  # add to dictionary
 
-        new_instance = HBNBCommand.classes[cls_name](**att_dic)
-        storage.new(new_instance)
-        print(new_instance.id)
+        if att_dic == {}:
+            new_object = eval(cls_name)()
+        else:
+            new_object = eval(cls_name)(**kwargs)
+            storage.new(new_object)
+
+        print(new_object.id)
         storage.save()
 
     def help_create(self):
