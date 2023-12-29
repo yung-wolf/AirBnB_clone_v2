@@ -11,15 +11,18 @@ from markupsafe import escape
 
 app = Flask(__name__)
 
+
 @app.route("/", strict_slashes=False)
 def hello():
     """Say hello to HBNB."""
     return "Hello HBNB!"
 
+
 @app.route("/hbnb", strict_slashes=False)
 def hbnb():
     """Show HBNB."""
     return "HBNB"
+
 
 @app.route("/c/<text>", strict_slashes=False)
 def show_hbnb(text):
