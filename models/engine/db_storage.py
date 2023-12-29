@@ -45,8 +45,7 @@ class DBStorage:
                     objs = self.__session.query(val).all()
                     if len(objs) > 0:
                         for obj in objs:
-                            k = "{}.{}".format(obj.__class__.__name__,
-                                                 obj.id)
+                            k = "{}.{}".format(obj.__class__.__name__, obj.id)
                             db_dict[k] = obj
             return db
 
