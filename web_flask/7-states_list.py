@@ -28,20 +28,20 @@ def hbnb():
 @app.route("/c/<text>", strict_slashes=False)
 def show_c(text):
     """Show C <text>."""
-    return f"C {escape(text).replace('_', ' ')}"
+    return "C {}".format(text.replace('_', ' '))
 
 
 @app.route("/python", strict_slashes=False)
 @app.route("/python/<text>", strict_slashes=False)
 def show_py(text='is cool'):
     """Show Python <text>."""
-    return f"Python {escape(text).replace('_', ' ')}"
+    return "Python {}".format(text.replace('_', ' '))
 
 
 @app.route("/number/<int:n>", strict_slashes=False)
 def show_num(n):
     """Show <n> if int."""
-    return f"{n} is a number"
+    return "{:d} is a number".format(n)
 
 
 @app.route("/number_template/<int:n>", strict_slashes=False)
